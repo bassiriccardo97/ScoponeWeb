@@ -87,7 +87,6 @@ button[class=board]{
     height: 100%;
     border: none;
     border-radius: 15px;
-    border-color: yellow;
 }
 
 button[class=hand]{
