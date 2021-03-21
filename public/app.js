@@ -56,7 +56,7 @@
         '    <h3 id="createHint">Then create a new game or join an existing one.</h3>\n' +
         '    <div class="form">\n' +
         '        <label for="nickname">Nickname</label>\n' +
-        '        <input type="text" id="nickname" name="nickname" placeholder="Nickname">\n' +
+        '        <input type="text" id="nickname" name="nickname" placeholder="Nickname (max 10 chars)">\n' +
         '\n' +
         '        <br>\n' +
         '        <br>\n' +
@@ -274,12 +274,17 @@
 
     // ----------BUTTON LISTENERS---------- //
 
-    $('#nickame, #room, #password').on("keyup", action);
+    $('#nickname, #room, #password').on("keyup", action);
 
     function action() {
         $('#btnCreate').prop("disabled", true);
         $('#btnJoin').prop("disabled", true);
+        document.getElementById("createHint").innerText = "Then create a new game or join an existing one.";
         if($('#nickname').val().length > 0 && $('#room').val().length > 0 && $('#password').val().length > 0) {
+            if ($('#nickname').val().length > 10){
+                document.getElementById("createHint").innerText = "Please, the nickname must be less than 10 chars.";
+                return;
+            }
             gameName = $('#room').val() + "-" + $('#password').val();
             var existing = false;
             for (var i = 0; i < gameList.length; i++){
@@ -305,6 +310,11 @@
         if (nick.length < 1 || roomName.length < 1 || psw.length < 1){
             return;
         }
+
+        /*if (nick.length > 10){
+            document.getElementById("createHint").innerText = "Please, the nickname must be less than 10 chars.";
+            return;
+        }*/
 
         if (gameList.includes(roomName + "-" + psw)){
             document.getElementById("createHint").innerText = "Sorry, the room has just been created. Choose another room or press the \"Join\" button";
@@ -341,6 +351,11 @@
             return; // Add wrong text msg
         }
 
+        /*if (nick.length > 10){
+            document.getElementById("createHint").innerText = "Please, the nickname must be less than 10 chars.";
+            return;
+        }*/
+
         // Retrieve game and add player
         gameRef = dbRef.child(roomName + "-" + psw);
         gameRef.child("plCount").get().then(function (snapshot) {
@@ -354,9 +369,8 @@
                     home.innerHTML = gameLayout;
                     addNamesListener();
                     addStartListener();
-
                 } else {
-                    document.getElementById("createHint").innerText = "Sorry, the room is full. Choose another room or create a new one."
+                    document.getElementById("createHint").innerText = "Sorry, the room is full. Choose another room or create a new one.";
                 }
             } else {
                 console.log("No data available");
@@ -769,6 +783,9 @@
                 document.getElementById("yourTurn").innerHTML = "Counting points...";
                 document.getElementById("yourTurn").style.fontSize = "30px";
                 document.getElementById("yourTurn").style.color = "white";
+                document.getElementById("eastName").style.color = "white";
+                document.getElementById("northName").style.color = "white";
+                document.getElementById("westName").style.color = "white";
                 if (turn === thisPlNum){
                     takeRemainingCards();
                     gameRef.child("ended").set(true);
@@ -1002,20 +1019,6 @@
         }
         /*if (playedCard === -2){
             enableBoardButtons();
-        }*/
-        //TODO non funziona
-        /*if (countCardPlayed >= 37){
-            if (turn === thisPlNum){
-                document.getElementById("leftPlayerCard").hidden = true;
-            } else if ((thisPlNum < 3 && turn === thisPlNum + 1) || (thisPlNum === 3 && turn === 0)){
-                return;
-            } else if ((thisPlNum < 2 && turn === thisPlNum + 2) || (thisPlNum === 2 && turn === 0) || (thisPlNum === 3 && turn === 1)){
-                document.getElementById("rightPlayerCard").hidden = true;
-            } else if ((thisPlNum === 0 && turn === 3) || (thisPlNum === 1 && turn === 0) || (thisPlNum === 2 && turn === 1) || (thisPlNum === 3 && turn === 2)){
-                document.getElementById("topPlayerCard").hidden = true;
-            } else {
-                document.getElementById("leftPlayerCard").hidden = true;
-            }
         }*/
     }
 
@@ -1508,6 +1511,25 @@
                 $(document).ready(function () {
                     $("#leftPlayerCard").animate({left: "-=200"}, 1);
                 });
+            }
+        }
+        if (countCardPlayed > 36){
+            //console.log(">36");
+            if ((turn === 3 && thisPlNum === 0) || (thisPlNum - turn === 1)){
+                document.getElementById("leftPlayerCard").hidden = true;
+                //console.log("left hidden");
+            } else if (Math.abs(thisPlNum - turn) === 2){
+                document.getElementById("topPlayerCard").hidden = true;
+                //console.log("top hidden");
+            } else if ((turn === 0 && thisPlNum === 3) || (turn - thisPlNum) === 1){
+                document.getElementById("rightPlayerCard").hidden = true;
+                //console.log("right hidden");
+            }
+            if (countCardPlayed === 40){
+                document.getElementById("topPlayerCard").hidden = true;
+                document.getElementById("leftPlayerCard").hidden = true;
+                document.getElementById("rightPlayerCard").hidden = true;
+                //console.log("all hidden");
             }
         }
     }
